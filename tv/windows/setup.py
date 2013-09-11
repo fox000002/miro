@@ -46,7 +46,7 @@ from distutils import file_util, dir_util
 ###############################################################################
 
 # The location of the NSIS compiler
-NSIS_PATH = 'C:\\Program Files\\NSIS\\makensis.exe'
+NSIS_PATH = 'C:\\Program Files (x86)\\NSIS\\makensis.exe'
 
 # This is the version of the binary kit to use
 BINARY_KIT_VERSION = open("binary_kit_version").read().strip()
@@ -151,6 +151,8 @@ import py2exe
 import py2exe.build_exe
 import os
 import sys
+import platform as plat
+from sys import platform
 from Pyrex.Distutils import build_ext
 
 # The name of this platform.
@@ -185,11 +187,26 @@ sys.path.insert(0, MUTAGEN_PATH)
 sys.path.insert(0, os.path.join(GSTREAMER_PATH, 'lib', 'site-packages'))
 sys.path.insert(0, os.path.join(GSTREAMER_PATH, 'lib', 'site-packages', 'gst-0.10'))
 
+if platform == 'win32' or platform == "windows":
+    extraLinkArgs = ['/MANIFEST']
+    # Handle the very frequent case when user need to use Visual C++ 2010
+    # with Python that wants to use Visual C++ 2008.
+    if plat.python_compiler().startswith('MSC v.1500'):
+        if (not ('VS90COMNTOOLS' in os.environ)):
+            if 'VS100COMNTOOLS' in os.environ:
+                os.environ['VS90COMNTOOLS'] = os.environ['VS100COMNTOOLS']
+            elif ('VS110COMNTOOLS' in os.environ):
+              os.environ['VS90COMNTOOLS'] = os.environ['VS110COMNTOOLS']
+elif platform == 'linux2':
+    pass
+else:
+    raise Exception("Platform '" + platform + "' isn't supported")
 
 #### Extensions ####
 ngrams_ext = \
     Extension("miro.ngrams",
         [os.path.join(portable_dir, 'ngrams.c')],
+		extra_link_args=extraLinkArgs
     )
 
 pygtkhacks_ext = Extension(
@@ -203,7 +220,8 @@ pygtkhacks_ext = Extension(
         'gtk-win32-2.0',
         'gdk-win32-2.0',
         'pango-1.0',
-        ]
+        ],
+	extra_link_args=extraLinkArgs
     )
 
 namecollation_ext = \
@@ -213,6 +231,7 @@ namecollation_ext = \
         include_dirs=[os.path.join(XULRUNNER_SDK_PATH, 'include')],
         library_dirs=[SQLITE3_PATH],
         libraries=['sqlite3'],
+		extra_link_args=extraLinkArgs
     )
 
 fixedliststore_dir = os.path.join(portable_widgets_dir, 'gtk', 'fixedliststore')
@@ -231,7 +250,8 @@ fixedliststore_ext = Extension(
             'glib-2.0',
             'gobject-2.0',
             'gthread-2.0',
-        ]
+        ],
+		extra_link_args=extraLinkArgs
     )
 
 embeddingwindow_ext = \
@@ -273,7 +293,8 @@ xulrunnerbrowser_ext = Extension(
         os.path.join(xulrunnerbrowser_ext_dir, 'MiroWindowCreator.cpp'),
         os.path.join(xulrunnerbrowser_ext_dir, 'MiroDirectoryProvider.cpp'),
         os.path.join(xulrunnerbrowser_ext_dir, 'Init.cpp'),
-        ]
+        ],
+	extra_link_args=extraLinkArgs
     )
 
 # Setting the path here allows py2exe to find the DLLS
