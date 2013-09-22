@@ -50,7 +50,7 @@ private:
   ~MiroDirectoryProvider();
 
 protected:
-  nsILocalFile *mProfileDir;
+  nsIFile *mProfileDir;
 };
 
 

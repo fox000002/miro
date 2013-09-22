@@ -86,13 +86,13 @@ NS_IMETHODIMP MiroWindowCreator::CreateChromeWindow(nsIWebBrowserChrome
 
 NS_IMETHODIMP MiroWindowCreator::CreateChromeWindow2(
         nsIWebBrowserChrome *parent, PRUint32 chromeFlags, 
-        PRUint32 contextFlags, nsIURI *uri, PRBool *cancel,
+        PRUint32 contextFlags, nsIURI *uri, bool *cancel,
         nsIWebBrowserChrome **_retval)
 {
     nsCAutoString specString;
     if((chromeFlags & nsIWebBrowserChrome::CHROME_OPENAS_CHROME) == 0) {
-      *cancel = PR_TRUE;
-      *_retval = nsnull;
+      *cancel = true;
+      *_retval = nullptr;
         if(uri) {
             uri->GetSpec(specString);
             if(mWindowCallback) {
@@ -111,7 +111,7 @@ NS_IMETHODIMP MiroWindowCreator::CreateChromeWindow2(
       appShellService->CreateTopLevelWindow(0, 0, chromeFlags,
 					    nsIAppShellService::SIZE_TO_CONTENT,
 					    nsIAppShellService::SIZE_TO_CONTENT,
-					    appShell, getter_AddRefs(newWindow));
+					    getter_AddRefs(newWindow));
       if (newWindow) {
 	newWindow->SetContextFlags(contextFlags);
 	 nsCOMPtr<nsIInterfaceRequestor> thing(do_QueryInterface(newWindow));

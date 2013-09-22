@@ -266,6 +266,7 @@ xulrunnerbrowser_ext = Extension(
     include_dirs=[
         os.path.join(XULRUNNER_SDK_PATH, 'sdk', 'include'),
         os.path.join(XULRUNNER_SDK_PATH, 'include'),
+        os.path.join(XULRUNNER_SDK_PATH, 'include', 'nspr'),
         os.path.join(XULRUNNER_SDK_PATH, 'include', 'xpcom'),
         portable_xpcom_dir,
         ] + GTK_INCLUDE_DIRS,
@@ -273,6 +274,7 @@ xulrunnerbrowser_ext = Extension(
         ("XP_WIN", 1),
         ("XPCOM_GLUE", 1),
         ("PCF_USING_XULRUNNER19", 1),
+		("nsCAutoString", "nsAutoCString"),
         ],
     library_dirs=[
         os.path.join(XULRUNNER_SDK_PATH, 'lib'),
@@ -294,7 +296,8 @@ xulrunnerbrowser_ext = Extension(
         os.path.join(xulrunnerbrowser_ext_dir, 'MiroDirectoryProvider.cpp'),
         os.path.join(xulrunnerbrowser_ext_dir, 'Init.cpp'),
         ],
-	extra_link_args=extraLinkArgs
+	extra_compile_args=['/MANIFEST', '/Zi'],
+	extra_link_args  = ['/MANIFEST', '/DEBUG']
     )
 
 # Setting the path here allows py2exe to find the DLLS

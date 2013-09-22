@@ -31,7 +31,7 @@
 
 #include "MiroDirectoryProvider.h"
 #include "nsXPCOMCID.h"
-#include "nsILocalFile.h"
+#include "nsIFile.h"
 #include "nsIDirectoryService.h"
 #include "nsAppDirectoryServiceDefs.h"
 #include "nsXULAppAPI.h"
@@ -50,7 +50,7 @@ MiroDirectoryProvider::~MiroDirectoryProvider()
 nsresult MiroDirectoryProvider::install(const char* dir)
 {
     nsresult rv;
-    rv = NS_NewNativeLocalFile(nsEmbedCString(dir), PR_FALSE, &mProfileDir);
+    rv = NS_NewNativeLocalFile(nsEmbedCString(dir), false, &mProfileDir);
     NS_ENSURE_SUCCESS(rv, rv);
     nsCOMPtr<nsIDirectoryService> directory_service(
                 do_GetService(NS_DIRECTORY_SERVICE_CONTRACTID, &rv));
@@ -62,12 +62,12 @@ nsresult MiroDirectoryProvider::install(const char* dir)
 }
 
 NS_IMETHODIMP MiroDirectoryProvider::GetFile(const char *aKey,
-					     PRBool *aPersist,
+					     bool *aPersist,
 					     nsIFile* *aResult)
 {
   if (!strcmp(aKey, NS_APP_USER_PROFILE_50_DIR) ||
       !strcmp(aKey, NS_APP_PROFILE_DIR_STARTUP)) {
-    *aPersist = PR_TRUE;
+    *aPersist = true;
     return mProfileDir->Clone(aResult);
   }
   return NS_ERROR_FAILURE;

@@ -46,14 +46,14 @@ cdef extern from "Python.h":
 
 cdef extern from "nscore.h":
     ctypedef unsigned int nsresult
-    ctypedef unsigned int PRBool
+    ctypedef unsigned int bool
     cdef enum NS_RESULT_VALUES:
         NS_OK = 0
 
 cdef extern from "MiroBrowserEmbed.h":
-    ctypedef void(*focusCallback)(PRBool forward, void* data)
+    ctypedef void(*focusCallback)(bool forward, void* data)
     ctypedef int(*uriCallback)(char* data, void* data)
-    ctypedef void(*networkCallback)(PRBool is_start, nsresult aStatus, char* data, void* data)
+    ctypedef void(*networkCallback)(bool is_start, nsresult aStatus, char* data, void* data)
     ctypedef struct MiroBrowserEmbed:
         nsresult (*init)(unsigned long parentWindow, int x, int y, int width, 
                 int height)
@@ -170,7 +170,7 @@ def add_cookie(name, value, domain, path, expiry):
 class XPCOMError(StandardError):
     pass
 
-cdef void focusCallbackGlue(PRBool forward, void* data) with gil:
+cdef void focusCallbackGlue(bool forward, void* data) with gil:
     cdef PyObject* retval
     retval = PyObject_CallMethod(<PyObject*>data,
             "on_browser_focus", "b", forward)
@@ -189,7 +189,7 @@ cdef int uriCallbackGlue(char *uri, void* data) with gil:
         Py_DECREF(should_load)
     return retval
 
-cdef void networkCallbackGlue(PRBool is_start, nsresult aStatus, char* uri, void* data) with gil:
+cdef void networkCallbackGlue(bool is_start, nsresult aStatus, char* uri, void* data) with gil:
     cdef PyObject* retval
 
     if is_start:

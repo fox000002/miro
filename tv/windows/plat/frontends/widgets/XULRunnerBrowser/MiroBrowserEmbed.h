@@ -56,9 +56,9 @@
 #include "nsIHistoryEntry.h"
 #include "nsISHistory.h"
 
-typedef void(*focusCallback)(PRBool forward, void* data);
+typedef void(*focusCallback)(bool forward, void* data);
 typedef int(*uriCallback)(char* uri, void* data);
-typedef void(*networkCallback)(PRBool is_start, nsresult aStatus, char* uri, void* data);
+typedef void(*networkCallback)(bool is_start, nsresult aStatus, char* uri, void* data);
 
 class MiroBrowserEmbed   : public nsIWebBrowserChrome,
                            public nsIWebBrowserChromeFocus,
@@ -141,7 +141,7 @@ public:
 protected:
     nativeWindow mWindow;
     PRUint32     mChromeFlags;
-    PRBool       mContinueModalLoop;
+    bool       mContinueModalLoop;
     focusCallback mFocusCallback;
     uriCallback mURICallback;
     networkCallback mNetworkCallback;
@@ -153,7 +153,7 @@ protected:
     nsCOMPtr<nsIWebBrowser> mWebBrowser;
     nsCOMPtr<nsIWebNavigation> mWebNavigation;
     nsCOMPtr<nsIURIContentListener> mParentContentListener;
-    PRBool is_enabled();
+    bool is_enabled();
 };
 
 /* Couple of utility functions, since the XPCOM Macros don't seem to work from

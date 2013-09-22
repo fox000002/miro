@@ -45,7 +45,7 @@
 #include "nsIDOMWindow.h"
 #include "nsIInterfaceRequestorUtils.h"
 #include "nsIIOService.h"
-#include "nsILocalFile.h"
+#include "nsIFile.h"
 #include "nsIProperties.h"
 #include "nsISupportsImpl.h"
 #include "nsIWebBrowser.h"
@@ -67,8 +67,8 @@
 
 MiroBrowserEmbed::MiroBrowserEmbed()
 {
-    mWindow = nsnull;
-    mFocusCallback = nsnull;
+    mWindow = nullptr;
+    mFocusCallback = nullptr;
 }
 
 MiroBrowserEmbed::~MiroBrowserEmbed()
@@ -91,10 +91,10 @@ nsresult MiroBrowserEmbed::init(unsigned long parentWindow, int x,
     dsti->SetItemType(nsIDocShellTreeItem::typeContentWrapper);
 
     nsCOMPtr<nsIBaseWindow> browserBaseWindow(do_QueryInterface(mWebBrowser));
-    browserBaseWindow->InitWindow(mWindow, nsnull, x, y, width, height);
+    browserBaseWindow->InitWindow(mWindow, nullptr, x, y, width, height);
     browserBaseWindow->Create();
-    browserBaseWindow->SetVisibility(PR_TRUE);
-    browserBaseWindow->SetEnabled(PR_TRUE);
+    browserBaseWindow->SetVisibility(true);
+    browserBaseWindow->SetEnabled(true);
 
     rv = mWebBrowser->GetParentURIContentListener(
             getter_AddRefs(mParentContentListener));
@@ -119,9 +119,9 @@ nsresult MiroBrowserEmbed::disable()
     nsresult rv;
     nsCOMPtr<nsIBaseWindow> browserBaseWindow(do_QueryInterface(mWebBrowser));
 
-    rv = browserBaseWindow->SetVisibility(PR_FALSE);
+    rv = browserBaseWindow->SetVisibility(false);
     NS_ENSURE_SUCCESS(rv, rv);
-    browserBaseWindow->SetEnabled(PR_FALSE);
+    browserBaseWindow->SetEnabled(false);
     // If SetEnabled fails, we should still just return NS_OK.  See #18793.
     return NS_OK;
 }
@@ -141,11 +141,11 @@ nsresult MiroBrowserEmbed::enable()
         loadURI("about:blank");
     }
 
-    rv = browserBaseWindow->SetVisibility(PR_TRUE);
+    rv = browserBaseWindow->SetVisibility(true);
     NS_ENSURE_SUCCESS(rv, rv);
-    rv = browserBaseWindow->SetEnabled(PR_TRUE);
+    rv = browserBaseWindow->SetEnabled(true);
     NS_ENSURE_SUCCESS(rv, rv);
-    rv = browserBaseWindow->Repaint(PR_FALSE);
+    rv = browserBaseWindow->Repaint(false);
     NS_ENSURE_SUCCESS(rv, rv);
     return NS_OK;
 }
@@ -156,9 +156,9 @@ void MiroBrowserEmbed::destroy()
     browserBaseWindow->Destroy();
 }
 
-PRBool MiroBrowserEmbed::is_enabled()
+bool MiroBrowserEmbed::is_enabled()
 {
-    PRBool enabled;
+    bool enabled;
     nsCOMPtr<nsIBaseWindow> browserBaseWindow(do_QueryInterface(mWebBrowser));
     browserBaseWindow->GetEnabled(&enabled);
     return enabled;
@@ -179,20 +179,20 @@ nsresult MiroBrowserEmbed::downloadURI(const char* uri, const char* path)
   nsresult rv;
   nsIURI *aURI;
   nsCOMPtr<nsIIOService> io_service(do_GetService(NS_IOSERVICE_CONTRACTID));
-  io_service->NewURI(nsDependentCString(uri), nsnull, nsnull, &aURI);
+  io_service->NewURI(nsDependentCString(uri), nullptr, nullptr, &aURI);
   if (!aURI) {
     return NS_ERROR_FAILURE;
   }
   nsCOMPtr<nsIWebBrowserPersist> persist(do_CreateInstance(NS_WEBBROWSERPERSIST_CONTRACTID, &rv));
   NS_ENSURE_SUCCESS(rv, rv);
-  nsCOMPtr<nsILocalFile> file(do_CreateInstance(NS_LOCAL_FILE_CONTRACTID, &rv));
+  nsCOMPtr<nsIFile> file(do_CreateInstance(NS_LOCAL_FILE_CONTRACTID, &rv));
   NS_ENSURE_SUCCESS(rv, rv);
   file->InitWithPath(NS_ConvertASCIItoUTF16(path));
   persist->SetProgressListener(this);
   persist->SetPersistFlags(nsIWebBrowserPersist::PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION|
 			   nsIWebBrowserPersist::PERSIST_FLAGS_CLEANUP_ON_FAILURE|
 			   nsIWebBrowserPersist::PERSIST_FLAGS_FORCE_ALLOW_COOKIES);
-  persist->SaveURI(aURI, nsnull, nsnull, nsnull, "", file);
+  persist->SaveURI(aURI, nullptr, nullptr, nullptr, "", file, nullptr);
   return NS_OK;
 }
 
@@ -205,7 +205,7 @@ nsresult MiroBrowserEmbed::getCurrentURI(char ** uri)
     rv = mWebNavigation->GetCurrentURI(&aURI);
     NS_ENSURE_SUCCESS(rv, rv);
     if(!aURI) {
-        *uri = nsnull;
+        *uri = nullptr;
         return NS_OK;
     }
 
@@ -230,7 +230,7 @@ nsresult MiroBrowserEmbed::getCurrentTitle(char ** aTitle, int* length)
     rv = history->GetIndex(&index);
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = history->GetEntryAtIndex(index, PR_FALSE, &historyentry);
+    rv = history->GetEntryAtIndex(index, false, &historyentry);
     NS_ENSURE_SUCCESS(rv, rv);
 
     rv = historyentry->GetTitle(&title);
@@ -248,7 +248,7 @@ nsresult MiroBrowserEmbed::resize(int x, int y, int width, int height)
             do_QueryInterface(mWebBrowser));
     if(!browserBaseWindow) return NS_ERROR_FAILURE;
     return browserBaseWindow->SetPositionAndSize(x, y, width, height,
-            PR_TRUE);
+            true);
 }
 
 // Activate the browser window.  This makes it take keyboard focus and display
@@ -292,14 +292,14 @@ void MiroBrowserEmbed::SetNetworkCallback(networkCallback callback, void* data)
 
 int MiroBrowserEmbed::canGoBack()
 {
-    PRBool retval;
+    bool retval;
     mWebNavigation->GetCanGoBack(&retval);
     return retval;
 }
 
 int MiroBrowserEmbed::canGoForward()
 {
-    PRBool retval;
+    bool retval;
     mWebNavigation->GetCanGoForward(&retval);
     return retval;
 }
@@ -395,21 +395,21 @@ NS_IMETHODIMP MiroBrowserEmbed::SizeBrowserTo(PRInt32 aWidth, PRInt32 aHeight)
 
 NS_IMETHODIMP MiroBrowserEmbed::ShowAsModal(void)
 {
-  mContinueModalLoop = PR_TRUE;
+  mContinueModalLoop = true;
   //AppCallbacks::RunEventLoop(mContinueModalLoop);
 
   return NS_OK;
 }
 
-NS_IMETHODIMP MiroBrowserEmbed::IsWindowModal(PRBool *_retval)
+NS_IMETHODIMP MiroBrowserEmbed::IsWindowModal(bool *_retval)
 {
-    *_retval = PR_FALSE;
+    *_retval = false;
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP MiroBrowserEmbed::ExitModalEventLoop(nsresult aStatus)
 {
-  mContinueModalLoop = PR_FALSE;
+  mContinueModalLoop = false;
   return NS_OK;
 }
 
@@ -420,14 +420,14 @@ NS_IMETHODIMP MiroBrowserEmbed::ExitModalEventLoop(nsresult aStatus)
 NS_IMETHODIMP MiroBrowserEmbed::FocusNextElement()
 {
     if(mFocusCallback && is_enabled())
-        mFocusCallback(PR_TRUE, mFocusCallbackData);
+        mFocusCallback(true, mFocusCallbackData);
     return NS_OK;
 }
 
 NS_IMETHODIMP MiroBrowserEmbed::FocusPrevElement()
 {
     if(mFocusCallback && is_enabled())
-        mFocusCallback(PR_FALSE, mFocusCallbackData);
+        mFocusCallback(false, mFocusCallbackData);
     return NS_OK;
 }
 
@@ -468,7 +468,7 @@ NS_IMETHODIMP MiroBrowserEmbed::GetTitle(PRUnichar * *aTitle)
 {
    NS_ENSURE_ARG_POINTER(aTitle);
 
-   *aTitle = nsnull;
+   *aTitle = nullptr;
    
    return NS_ERROR_NOT_IMPLEMENTED;
 }
@@ -478,13 +478,13 @@ NS_IMETHODIMP MiroBrowserEmbed::SetTitle(const PRUnichar * aTitle)
 }
 
 /* attribute boolean visibility; */
-NS_IMETHODIMP MiroBrowserEmbed::GetVisibility(PRBool * aVisibility)
+NS_IMETHODIMP MiroBrowserEmbed::GetVisibility(bool * aVisibility)
 {
     NS_ENSURE_ARG_POINTER(aVisibility);
-    *aVisibility = PR_TRUE;
+    *aVisibility = true;
     return NS_OK;
 }
-NS_IMETHODIMP MiroBrowserEmbed::SetVisibility(PRBool aVisibility)
+NS_IMETHODIMP MiroBrowserEmbed::SetVisibility(bool aVisibility)
 {
     return NS_OK;
 }
@@ -502,12 +502,12 @@ NS_IMETHODIMP MiroBrowserEmbed::GetSiteWindow(void * *aSiteWindow)
 // MiroBrowserEmbed::nsIURIContentListener
 //*****************************************************************************   
 /* boolean onStartURIOpen (in nsIURI aURI); */
-NS_IMETHODIMP MiroBrowserEmbed::OnStartURIOpen(nsIURI *aURI, PRBool *_retval)
+NS_IMETHODIMP MiroBrowserEmbed::OnStartURIOpen(nsIURI *aURI, bool *_retval)
 {
     nsresult rv;
     int should_load;
     nsCAutoString specString;
-    *_retval = PR_FALSE;
+    *_retval = false;
 
     rv = aURI->GetSpec(specString);
     NS_ENSURE_SUCCESS(rv, rv);
@@ -518,24 +518,24 @@ NS_IMETHODIMP MiroBrowserEmbed::OnStartURIOpen(nsIURI *aURI, PRBool *_retval)
     if(mURICallback && is_enabled()) {
       should_load = mURICallback((char*)specString.get(), mURICallbackData);
       if(should_load == 0) {
-	*_retval = PR_TRUE;
+	*_retval = true;
       }
     }
     return NS_OK;
 }
 
 /* boolean doContent (in string aContentType, in boolean aIsContentPreferred, in nsIRequest aRequest, out nsIStreamListener aContentHandler); */
-NS_IMETHODIMP MiroBrowserEmbed::DoContent(const char *aContentType, PRBool aIsContentPreferred, nsIRequest *aRequest, nsIStreamListener **aContentHandler, PRBool *_retval)
+NS_IMETHODIMP MiroBrowserEmbed::DoContent(const char *aContentType, bool aIsContentPreferred, nsIRequest *aRequest, nsIStreamListener **aContentHandler, bool *_retval)
 {
     return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 /* boolean isPreferred (in string aContentType, out string aDesiredContentType); */
-NS_IMETHODIMP MiroBrowserEmbed::IsPreferred(const char *aContentType, char **aDesiredContentType, PRBool *_retval)
+NS_IMETHODIMP MiroBrowserEmbed::IsPreferred(const char *aContentType, char **aDesiredContentType, bool *_retval)
 {
     // This method was pretty much copied from GtkMozEmbed
-    *_retval = PR_FALSE;
-    *aDesiredContentType = nsnull;
+    *_retval = false;
+    *aDesiredContentType = nullptr;
 
     if (aContentType) {
         nsCOMPtr<nsIWebNavigationInfo> webNavInfo(
@@ -553,9 +553,9 @@ NS_IMETHODIMP MiroBrowserEmbed::IsPreferred(const char *aContentType, char **aDe
 }
 
 /* boolean canHandleContent (in string aContentType, in boolean aIsContentPreferred, out string aDesiredContentType); */
-NS_IMETHODIMP MiroBrowserEmbed::CanHandleContent(const char *aContentType, PRBool aIsContentPreferred, char **aDesiredContentType, PRBool *_retval)
+NS_IMETHODIMP MiroBrowserEmbed::CanHandleContent(const char *aContentType, bool aIsContentPreferred, char **aDesiredContentType, bool *_retval)
 {
-    *_retval = PR_FALSE;
+    *_retval = false;
     return NS_OK;
 }
 
@@ -602,9 +602,9 @@ NS_IMETHODIMP MiroBrowserEmbed::OnStateChange(nsIWebProgress *aWebProgress, nsIR
           NS_NAMED_LITERAL_STRING(specString, "");
         }
         if(aStateFlags & nsIWebProgressListener::STATE_START) {
-	  mNetworkCallback(PR_TRUE, 0, (char*)specString.get(), mNetworkCallbackData);
+	  mNetworkCallback(true, (nsresult)0, (char*)specString.get(), mNetworkCallbackData);
         } else if(aStateFlags & nsIWebProgressListener::STATE_STOP) {
-	  mNetworkCallback(PR_FALSE, aStatus, (char*)specString.get(), mNetworkCallbackData);
+	  mNetworkCallback(false, aStatus, (char*)specString.get(), mNetworkCallbackData);
         }
     }
     return NS_OK;
@@ -617,7 +617,7 @@ NS_IMETHODIMP MiroBrowserEmbed::OnProgressChange(nsIWebProgress *aWebProgress, n
 }
 
 /* void onLocationChange (in nsIWebProgress aWebProgress, in nsIRequest aRequest, in nsIURI aLocation); */
-NS_IMETHODIMP MiroBrowserEmbed::OnLocationChange(nsIWebProgress *aWebProgress, nsIRequest *aRequest, nsIURI *aLocation)
+NS_IMETHODIMP MiroBrowserEmbed::OnLocationChange(nsIWebProgress *aWebProgress, nsIRequest *aRequest, nsIURI *aLocation, uint32_t)
 {
     return NS_OK;
 }
@@ -662,4 +662,9 @@ void addref(MiroBrowserEmbed* browser)
 void release(MiroBrowserEmbed* browser)
 {
     NS_RELEASE(browser);
+}
+
+NS_IMETHODIMP MiroBrowserEmbed::Blur(void)
+{
+    return NS_OK;	
 }

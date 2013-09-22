@@ -39,7 +39,7 @@
 
 #include "nsCOMPtr.h"
 #include "nsEmbedString.h"
-#include "nsILocalFile.h"
+#include "nsIFile.h"
 #include "nsXPCOMGlue.h" 
 #include "nsIPrefService.h"
 #include "nsXULAppAPI.h"
@@ -76,17 +76,17 @@ nsresult init_xulrunner(const char* xul_dir, const char* app_dir)
         { "XRE_TermEmbedding", (NSFuncPtr*) &XRE_TermEmbedding },
         { "XRE_LockProfileDirectory", (NSFuncPtr*) &XRE_LockProfileDirectory },
         { "XRE_NotifyProfile", (NSFuncPtr*) &XRE_NotifyProfile },
-        { nsnull, nsnull }
+        { nullptr, nullptr }
     }; 
     XPCOMGlueLoadXULFunctions(dynamicSymbols);
 
-    nsCOMPtr<nsILocalFile> xul_dir_file;
-    rv = NS_NewNativeLocalFile(nsEmbedCString(xul_dir), PR_FALSE,
+    nsCOMPtr<nsIFile> xul_dir_file;
+    rv = NS_NewNativeLocalFile(nsEmbedCString(xul_dir), false,
             getter_AddRefs(xul_dir_file));
     NS_ENSURE_SUCCESS(rv, rv);
 
-    nsCOMPtr<nsILocalFile> app_dir_file;
-    rv = NS_NewNativeLocalFile(nsEmbedCString(app_dir), PR_FALSE,
+    nsCOMPtr<nsIFile> app_dir_file;
+    rv = NS_NewNativeLocalFile(nsEmbedCString(app_dir), false,
                 getter_AddRefs(app_dir_file));
     NS_ENSURE_SUCCESS(rv, rv);
 
@@ -120,17 +120,17 @@ nsresult setup_user_agent(const char* vendor, const char* vendor_sub,
 void shutdown_xulrunner()
 {
     XRE_TermEmbedding();
-    XPCOMGlueShutdown();
+    //XPCOMGlueShutdown();
 }
 
 nsresult set_profile_dir(const char* dir)
 {
-  nsCOMPtr<nsILocalFile> profile_dir;
+  nsCOMPtr<nsIFile> profile_dir;
   nsCOMPtr<nsISupports> profile_lock;
-  nsresult rv = NS_NewNativeLocalFile(nsDependentCString(dir), PR_TRUE,
+  nsresult rv = NS_NewNativeLocalFile(nsDependentCString(dir), true,
 				      getter_AddRefs(profile_dir));
   NS_ENSURE_SUCCESS(rv, rv);
-  PRBool exists = PR_FALSE;
+  bool exists = false;
   profile_dir->Exists(&exists);
   if (!exists) {
     profile_dir->Create(nsIFile::DIRECTORY_TYPE, 0700);
